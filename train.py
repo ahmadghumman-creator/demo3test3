@@ -20,7 +20,7 @@ print(X_train.shape)
 
 print(X_test.shape)
 
-DT = DecisionTreeClassifier(criterion='gini')
+DT = DecisionTreeClassifier(criterion='gini',splitter='random',max_features='log2')
 
 print(type(DT))
 
