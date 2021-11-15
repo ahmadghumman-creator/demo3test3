@@ -20,7 +20,7 @@ print(X_train.shape)
 
 print(X_test.shape)
 
-DT = DecisionTreeClassifier(criterion='entropy')
+DT = DecisionTreeClassifier(criterion='gini')
 
 print(type(DT))
 
