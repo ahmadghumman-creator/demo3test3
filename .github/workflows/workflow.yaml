@@ -45,6 +45,7 @@ jobs:
          pip install matplotlib
          pip install dvc
          pip install dvc[azure]
+         
           
          #echo ${{env.AZ_CS}}
           
