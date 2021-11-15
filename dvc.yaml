@@ -1,0 +1,25 @@
+stages:
+  process_data:
+    cmd: python preprocessing.py
+    deps:
+    - preprocessing.py
+    - data/data_raw.csv
+    outs:
+    - data_processed.csv
+  feature_engineering:
+    cmd: python feature_engineering.py
+    deps:
+    - feature_engineering.py
+    - data_processed.csv
+    outs:
+    - data_features.csv
+  train:
+    cmd: python train.py
+    deps:
+    - train.py
+    - data_features.csv
+    outs:
+    - results.png
+    metrics:
+    - metrics.json:
+        cache: false

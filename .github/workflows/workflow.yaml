@@ -1,0 +1,68 @@
+name: MLOpsDemoTest
+on: [push]
+jobs:
+  deploy-runner:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: iterative/setup-cml@v1
+      - uses: actions/checkout@v2
+      - name: Deploy runner on AZVM
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}		  
+          REPO_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          cml-runner \
+            --cloud=azure \
+            --cloud-region=southeastasia \
+            --cloud-type=m \
+            --labels=cml-gpu \
+            --single=true \
+            --cloud-startup-script "IyEvYmluL2Jhc2gNCnN1ZG8gYXB0LWdldCBpbnN0YWxsIC15IFwNCiAgICBhcHQtdHJhbnNwb3J0LWh0dHBzIFwNCiAgICBjYS1jZXJ0aWZpY2F0ZXMgXA0KICAgIGN1cmwgXA0KICAgIHNvZnR3YXJlLXByb3BlcnRpZXMtY29tbW9uDQpjdXJsIC1mc1NMIGh0dHBzOi8vZG93bmxvYWQuZG9ja2VyLmNvbS9saW51eC91YnVudHUvZ3BnIHwgc3VkbyBhcHQta2V5IGFkZCAtDQpzdWRvIGFwdC1rZXkgZmluZ2VycHJpbnQgMEVCRkNEODgNCnN1ZG8gYWRkLWFwdC1yZXBvc2l0b3J5IFwNCiAgICJkZWIgW2FyY2g9YW1kNjRdIGh0dHBzOi8vZG93bmxvYWQuZG9ja2VyLmNvbS9saW51eC91YnVudHUgXA0KICAgJChsc2JfcmVsZWFzZSAtY3MpIFwNCiAgIHN0YWJsZSINCnN1ZG8gYXB0LWdldCB1cGRhdGUNCnN1ZG8gYXB0LWdldCBpbnN0YWxsIC15IGRvY2tlci1jZQ0Kc3VkbyBkb2NrZXIgcnVuIGhlbGxvLXdvcmxkDQojIExpbnV4IHBvc3QtaW5zdGFsbA0Kc3VkbyBncm91cGFkZCBkb2NrZXINCnN1ZG8gdXNlcm1vZCAtYUcgZG9ja2VyICRVU0VSDQpzdWRvIHN5c3RlbWN0bCBlbmFibGUgZG9ja2Vy"
+  train-model:
+    needs: deploy-runner
+    runs-on: [self-hosted, cml-gpu]
+    timeout-minutes: 4320 # 72h
+    container:
+      image: docker://ghcr.io/iterative/cml:0-dvc2-base1
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - uses: iterative/setup-cml@v1
+      - name: Train model
+        env:
+          REPO_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          AZ_CS: ${{ secrets.CONN_STR_AZDLAT }}
+        run: |
+          pip install wget
+          pip install sklearn
+          pip install pandas
+          pip install seaborn
+          pip install matplotlib
+          pip install dvc
+          pip install dvc[azure]
+          
+          #echo ${{env.AZ_CS}}
+          
+          dvc remote modify --local myremote connection_string ${{env.AZ_CS}}
+          
+          echo "fetched data"
+          
+          dvc pull
+          dvc repro
+          
+          git fetch --prune
+		  
+          dvc metrics diff --show-md main >> report.md
+                    
+          echo "## Metrics"
+          cat metrics.json
+          
+          cml-publish metrics.json >> report.md
+          echo "## Showing the measures in a graph"
+          cml-publish results.png --md >> report.md 
+          cml-send-comment report.md

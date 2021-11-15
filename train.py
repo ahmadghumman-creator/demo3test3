@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score,precision_score,f1_score
 import json
+import matplotlib.pyplot as plt
 
 titanic_df = pd.read_csv('data_features.csv')
 
@@ -35,6 +36,17 @@ print("Recall: ", f1_score(Y_test,Y_pred))
 acc = str(accuracy_score(Y_test,Y_pred))
 pre = str(precision_score(Y_test,Y_pred))
 f1s = str(f1_score(Y_test,Y_pred))
+
+X = ['Precision','Recall','f1-score']
+Res = [precision_score(Y_test,Y_pred), accuracy_score(Y_test,Y_pred), f1_score(Y_test,Y_pred)]
+
+plt.figure()
+# plot the linear data and the exponential data
+plt.plot(X, Res, '--o')
+plt.xlabel("Measure")
+plt.ylabel("Score")
+plt.title('Measures')
+plt.savefig('results.png')
 
 # Now print to file
 with open("metrics.json", 'w') as outfile:

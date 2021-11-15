@@ -1,0 +1,44 @@
+schema: '2.0'
+stages:
+  process_data:
+    cmd: python preprocessing.py
+    deps:
+    - path: data/data_raw.csv
+      md5: 9b75560db14fbe6a5e86cb55f72faf70
+      size: 60301
+    - path: preprocessing.py
+      md5: 93196a8fc4bb314ebe0f9eb76fe8422d
+      size: 856
+    outs:
+    - path: data_processed.csv
+      md5: 952c10a8fcac24c4a373a1a910c54d7b
+      size: 57585
+  feature_engineering:
+    cmd: python feature_engineering.py
+    deps:
+    - path: data_processed.csv
+      md5: 952c10a8fcac24c4a373a1a910c54d7b
+      size: 57585
+    - path: feature_engineering.py
+      md5: f65f4e8c164cffbdaaf2eadbc68098aa
+      size: 1232
+    outs:
+    - path: data_features.csv
+      md5: 28fa4df2951c59888ce66932ada7a065
+      size: 30966
+  train:
+    cmd: python train.py
+    deps:
+    - path: data_features.csv
+      md5: 28fa4df2951c59888ce66932ada7a065
+      size: 30966
+    - path: train.py
+      md5: 2f0389c08abf944abd4fd6678b373de4
+      size: 1585
+    outs:
+    - path: metrics.json
+      md5: 06cd520a25cead9d13d932e71b16bbf9
+      size: 103
+    - path: results.png
+      md5: 5d5f8f3b8e0449d42ba53e8c405267c7
+      size: 26030
