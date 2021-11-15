@@ -38,31 +38,29 @@ jobs:
           REPO_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           AZ_CS: ${{ secrets.CONN_STR_AZDLAT }}
         run: |
-          pip install wget
-          pip install sklearn
-          pip install pandas
-          pip install seaborn
-          pip install matplotlib
-          pip install dvc
-          pip install dvc[azure]
+         pip install wget
+         pip install sklearn
+         pip install pandas
+         pip install seaborn
+         pip install matplotlib
+         pip install dvc
+         pip install dvc[azure]
           
-          #echo ${{env.AZ_CS}}
+         #echo ${{env.AZ_CS}}
           
-          dvc remote modify --local myremote connection_string ${{env.AZ_CS}}
+         dvc remote modify --local myremote connection_string ${{env.AZ_CS}}
           
-          echo "fetched data"
+         echo "fetched data"
           
-          dvc pull
-          dvc repro
+         dvc pull
+         dvc repro
           
-          git fetch --prune
-		  
-          dvc metrics diff --show-md main >> report.md
-                    
-          echo "## Metrics"
-          cat metrics.json
+         git fetch --prune
+         dvc metrics diff --show-md main >> report.md
+         echo "## Metrics"
+         cat metrics.json
           
-          cml-publish metrics.json >> report.md
-          echo "## Showing the measures in a graph"
-          cml-publish results.png --md >> report.md 
-          cml-send-comment report.md
+         cml-publish metrics.json >> report.md
+         echo "## Showing the measures in a graph"
+         cml-publish results.png --md >> report.md 
+         cml-send-comment report.md
