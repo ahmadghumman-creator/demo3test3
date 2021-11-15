@@ -60,6 +60,7 @@ jobs:
          dvc metrics diff --show-md main >> report.md
          echo "## Metrics"
          cat metrics.json
+         
           
          cml-publish metrics.json >> report.md
          echo "## Showing the measures in a graph"
